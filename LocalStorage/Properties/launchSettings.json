@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Launch Neos": {
+      "commandName": "Executable",
+      "executablePath": "$(NeosPath)Neos.exe",
+      "commandLineArgs": "-DataPath \"D:\\Solirax\\Neos Data\" -CachePath \"D:\\Solirax\\Neos Cache\" -Screen -Invisible -LoadAssembly \"Libraries/NeosModLoader.dll\" -DontAutoOpenCloudHome",
+      "workingDirectory": "$(NeosPath)"
+    }
+  }
+}
