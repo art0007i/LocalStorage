@@ -9,5 +9,5 @@ It is possible to manually add/edit items and directories but make sure you know
 
 ## Installation
 1. Install [NeosModLoader](https://github.com/zkxs/NeosModLoader).
-1. Place [LocalStorage.dll](https://github.com/art0007i/LocalStorage/releases/latest/download/LocalStorage.dll) into your `nml_mods` folder. This folder should be at `C:\Program Files (x86)\Steam\steamapps\common\NeosVR\nml_mods` for a default install. You can create it if it's missing, or if you launch the game once with NeosModLoader installed it will create the folder for you.
+1. Place [LocalStorage.dll](https://github.com/art0007i/LocalStorage/releases/download/1.0.0.0/LocalStorage.dll) into your `nml_mods` folder. This folder should be at `C:\Program Files (x86)\Steam\steamapps\common\NeosVR\nml_mods` for a default install. You can create it if it's missing, or if you launch the game once with NeosModLoader installed it will create the folder for you.
 1. Start the game. If you want to verify that the mod is working you can check your Neos logs.
