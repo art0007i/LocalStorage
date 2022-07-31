@@ -50,8 +50,8 @@ namespace LocalStorage
         public static string DATA_PATH;
         public static string ResolveLstore(Uri uri)
         {
-            var unsafePath = DATA_PATH + Uri.UnescapeDataString(uri.AbsolutePath);
-            if (Path.GetFullPath(unsafePath).StartsWith(DATA_PATH))
+            var unsafePath = Path.GetFullPath(DATA_PATH + Uri.UnescapeDataString(uri.AbsolutePath)).Replace('\\', '/'); ;
+            if (unsafePath.StartsWith(DATA_PATH))
             {
                 if (File.Exists(unsafePath))
                 {
@@ -64,7 +64,7 @@ namespace LocalStorage
             }
             else
             {
-                throw new FileNotFoundException("Unexpected path was received. Path: " + unsafePath);
+                throw new FileNotFoundException("Unexpected path was received. Path: " + unsafePath + "\nDataPath: " + DATA_PATH);
             }
         }
 
@@ -73,8 +73,8 @@ namespace LocalStorage
         {
             public static void Postfix()
             {
-                REC_PATH = config.GetValue(REC_PATH_KEY);
-                DATA_PATH = config.GetValue(DATA_PATH_KEY);
+                REC_PATH = config.GetValue(REC_PATH_KEY).Replace('\\', '/');
+                DATA_PATH = config.GetValue(DATA_PATH_KEY).Replace('\\', '/');
                 if (!Directory.Exists(REC_PATH))
                 {
                     try { Directory.CreateDirectory(Path.Combine(REC_PATH, "Inventory")); }
@@ -448,5 +448,157 @@ namespace LocalStorage
                 return true;
             }
         }
+        /*
+         * World saving stuff, currently completely broken
+         * 
+        [HarmonyPatch(typeof(Userspace))]
+        class UserspacePatch
+        {
+            [HarmonyPatch("SaveWorldTaskIntern")]
+            [HarmonyPrefix]
+            public static bool SaveWorldTaskIntern(World world, Record record, RecordOwnerTransferer transferer, ref Task<Record> __result, Userspace __instance)
+            {
+                if(record.OwnerId == LOCAL_OWNER)
+                {
+                    __result = Task.Run(() =>
+                    {
+                        if (record == null)
+                        {
+                            throw new Exception("World record is null, cannot perform save");
+                        }
+                        TaskCompletionSource<SavedGraph> completionSource = new TaskCompletionSource<SavedGraph>();
+                        string _name = null;
+                        string _description = null;
+                        HashSet<string> _tags = null;
+                        world.RunSynchronously(delegate
+                        {
+                            try
+                            {
+                                int num = MaterialOptimizer.DeduplicateMaterials(world);
+                                int num2 = WorldOptimizer.DeduplicateStaticProviders(world);
+                                int num3 = WorldOptimizer.CleanupAssets(world, true, WorldOptimizer.CleanupMode.MarkNonpersistent);
+                                Msg(string.Format("World Optimized! Deduplicated Materials: {0}, Deduplicated Static Providers: {1}, Cleaned Up Assets: {2}", num, num2, num3));
+                                completionSource.SetResult(world.SaveWorld());
+                                _name = world.Name;
+                                _description = world.Description;
+                                _tags = new HashSet<string>();
+                                foreach (string text in world.Tags)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(text))
+                                    {
+                                        _tags.Add(text);
+                                    }
+                                }
+                            }
+                            catch (Exception exception)
+                            {
+                                completionSource.SetException(exception);
+                            }
+                        }, false, null, false);
+                        var t0 = completionSource.Task; t0.Wait();
+                        SavedGraph savedGraph = t0.Result;
+                        SavedGraph graph = savedGraph;
+                        //await default(ToBackground);
+                        Record result;
+                        try
+                        {
+                            if (transferer == null)
+                            {
+                                transferer = new RecordOwnerTransferer(__instance.Engine, record.OwnerId, null);
+                            }
+                            var t1 = transferer.EnsureOwnerId(graph);
+                            t1.Wait();
+                            DataTreeSaver dataTreeSaver = new DataTreeSaver(__instance.Engine);
+                            SavedGraph graph2 = graph;
+                            IWorldLink sourceLink = world.SourceLink;
+                            var t3 = dataTreeSaver.SaveLocally(graph2, (sourceLink != null) ? sourceLink.URL : null); t0.Wait();
+                            Uri uri = t3.Result;
+                            Debug(uri);
+                            if (!record.IsPublic)
+                            {
+                                World parent = world.Parent;
+                                bool? flag;
+                                if (parent == null)
+                                {
+                                    flag = null;
+                                }
+                                else
+                                {
+                                    Record correspondingRecord = parent.CorrespondingRecord;
+                                    flag = ((correspondingRecord != null) ? new bool?(correspondingRecord.IsPublic) : null);
+                                }
+                                bool? flag2 = flag;
+                                record.IsPublic = flag2.GetValueOrDefault();
+                            }
+                            record.Name = _name;
+                            record.Description = _description;
+                            record.Tags = _tags;
+                            record.AssetURI = uri.ToString();
+                            record.RecordType = "world";
+                            Uri sourceURL = CloudX.Shared.RecordUtil.GenerateUri(record.OwnerId, record.RecordId);
+                            if (world.CorrespondingRecord == record)
+                            {
+                                world.SourceURL = sourceURL;
+                            }
+                            string worldInfo = string.Format("Name: {0}. RecordId: {1}:{2}. Local: {3}, Global: {4}", new object[] { record.Name, record.OwnerId, record.RecordId, record.LocalVersion, record.GlobalVersion });
+
+                            var p = "";
+                            if(record.Path == null)
+                            {
+                                p = Path.Combine(DATA_PATH, record.Path, record.Name);
+                            }
+                            else
+                            {
+                                p = Path.Combine(DATA_PATH, record.Name);
+                            }
+                            Msg(record.Path);
+                            DataTreeConverter.Save(graph.Root, p + ".json");
+                            var recPath = Path.Combine(REC_PATH, record.Path, record.Name + ".json");
+                            using (var fs = File.CreateText(recPath))
+                            {
+                                JsonSerializer serializer = new JsonSerializer();
+                                serializer.Formatting = Formatting.Indented;
+                                serializer.Serialize(fs, record);
+                            }
+
+                            result = record;
+                            
+                        }
+                        catch (Exception ex)
+                        {
+                            string tempFilePath = __instance.Engine.LocalDB.GetTempFilePath(".lz4bson");
+                            DataTreeConverter.Save(graph.Root, tempFilePath);
+                            Error(string.Concat(new string[]
+                            {
+                                "Exception in the save process for ",
+                                _name,
+                                "!\nDumping the raw save data to: ",
+                                tempFilePath,
+                                "\n",
+                                (ex != null) ? ex.ToString() : null
+                            }));
+                            result = null;
+                        }
+                        return result;
+                    });
+                    return false;
+                }
+                return true;
+            }
+        }
+        [HarmonyPatch(typeof(RecordOwnerTransferer))]
+        class TransererPatch{
+            [HarmonyPatch("ShouldProcess")]
+            [HarmonyPrefix]
+            public static bool ShouldTransfer(string ownerId, string recordId, RecordOwnerTransferer __instance)
+            {
+                Debug(ownerId);
+                Debug(__instance.TargetOwnerID);
+                Debug(__instance.SourceRootOwnerID);
+                //return false;
+                return true;
+            }
+        }
+        */
     }
 }
