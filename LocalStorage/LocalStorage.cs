@@ -20,7 +20,7 @@ namespace LocalStorage
     {
         public override string Name => "LocalStorage";
         public override string Author => "art0007i";
-        public override string Version => "1.0.0";
+        public override string Version => "1.1.0";
         public override string Link => "https://github.com/art0007i/LocalStorage/";
 
         [AutoRegisterConfigKey]
@@ -172,12 +172,14 @@ namespace LocalStorage
                         List<RecordDirectory> subdirs = new List<RecordDirectory>();
                         List<Record> recs = new List<Record>();
 
-                        foreach (string dir in Directory.EnumerateDirectories(Path.Combine(REC_PATH, path)))
+                        path = path.Replace('\\', '/');
+                        var p = Path.Combine(REC_PATH, path);
+                        foreach (string dir in Directory.EnumerateDirectories(p))
                         {
                             var dirRec = CloudX.Shared.RecordHelper.CreateForDirectory<Record>(LOCAL_OWNER, path, Path.GetFileNameWithoutExtension(dir));
                             subdirs.Add(new RecordDirectory(dirRec, __instance, __instance.Engine));
                         }
-                        foreach (string file in Directory.EnumerateFiles(Path.Combine(REC_PATH, path)))
+                        foreach (string file in Directory.EnumerateFiles(p))
                         {
                             if (Path.GetExtension(file) != ".json") continue;
 
@@ -243,9 +245,10 @@ namespace LocalStorage
 
                 if (__instance.OwnerId == LOCAL_OWNER)
                 {
-                    var savePath = Path.Combine(DATA_PATH, __instance.ChildRecordPath, name);
+                    var fixedPath = __instance.ChildRecordPath.Replace('\\', '/');
+                    var savePath = Path.Combine(DATA_PATH, fixedPath, name);
                     var dataPath = savePath + ".json";
-                    var thumbPath = savePath + Path.GetExtension(thumbnail.ToString());
+                    //var thumbPath = savePath + Path.GetExtension(thumbnail.ToString());
 
                     var dataTask = __instance.Engine.LocalDB.TryOpenAsset(objectData);
                     dataTask.Wait(); var dataStream = dataTask.Result;
@@ -278,7 +281,7 @@ namespace LocalStorage
                         thumbFile.Flush(); thumbFile.Dispose();
                     }
                     */
-                    var fileLocalPath = "lstore:///" + __instance.ChildRecordPath + "/" + name + ".json";
+                    var fileLocalPath = "lstore:///" + fixedPath + "/" + name + ".json";
                     //var thumbLocalPath = "lstore:///" + __instance.ChildRecordPath + "/" + name + Path.GetExtension(thumbnail.ToString());
                     var thumbLocalPath = thumbnail.ToString();
 
@@ -289,7 +292,7 @@ namespace LocalStorage
                         rec.Tags = new HashSet<string>(tags);
                     }
 
-                    var recPath = Path.Combine(REC_PATH, __instance.ChildRecordPath, name + ".json");
+                    var recPath = Path.Combine(REC_PATH, fixedPath, name + ".json");
                     using (var fs = File.CreateText(recPath))
                     {
                         JsonSerializer serializer = new JsonSerializer();
@@ -310,7 +313,8 @@ namespace LocalStorage
             {
                 if(__instance.OwnerId == LOCAL_OWNER)
                 {
-                    var dirLoc = Path.Combine(REC_PATH, __instance.ChildRecordPath , name);
+                    var fixedPath = __instance.ChildRecordPath.Replace('\\', '/');
+                    var dirLoc = Path.Combine(REC_PATH, fixedPath , name);
                     if (Directory.Exists(dirLoc))
                     {
                         throw new Exception("Subdirectory with name '" + name + "' already exists.");
@@ -319,7 +323,7 @@ namespace LocalStorage
                     if (!dummyOnly)
                     {
                         Directory.CreateDirectory(dirLoc);
-                        Directory.CreateDirectory(Path.Combine(DATA_PATH, __instance.ChildRecordPath, name));
+                        Directory.CreateDirectory(Path.Combine(DATA_PATH, fixedPath, name));
                     }
                     var ret = new RecordDirectory(rec, __instance, __instance.Engine);
                     (AccessTools.Field(typeof(RecordDirectory), "subdirectories").GetValue(__instance) as List<RecordDirectory>).Add(ret);
@@ -335,10 +339,11 @@ namespace LocalStorage
             {
                 if (__instance.OwnerId == LOCAL_OWNER)
                 {
+                    var fixedPath = __instance.ChildRecordPath.Replace('\\', '/');
                     Record record = CloudX.Shared.RecordHelper.CreateForLink<Record>(name, __instance.OwnerId, target.ToString(), null);
                     record.Path = __instance.ChildRecordPath;
 
-                    var recPath = Path.Combine(REC_PATH, __instance.ChildRecordPath, name + ".json");
+                    var recPath = Path.Combine(REC_PATH, fixedPath, name + ".json");
                     using (var fs = File.CreateText(recPath))
                     {
                         JsonSerializer serializer = new JsonSerializer();
@@ -383,7 +388,7 @@ namespace LocalStorage
 
                         // this is not the smartest system,
                         // if a user manually creates a record that is in the wrong path and wrong name it could be bad
-                        File.Delete(Path.Combine(REC_PATH, record.Path, record.Name) + ".json");
+                        File.Delete(Path.Combine(REC_PATH, record.Path.Replace('\\', '/'), record.Name) + ".json");
                     }
                     __result = test;
                     return false;
@@ -423,13 +428,13 @@ namespace LocalStorage
                     }
                     if(dir.DirectoryRecord != null)
                     {
-                        Directory.Delete(Path.Combine(REC_PATH, dir.Path));
-                        Directory.Delete(Path.Combine(DATA_PATH, dir.Path));
+                        Directory.Delete(Path.Combine(REC_PATH, dir.Path.Replace('\\', '/')));
+                        Directory.Delete(Path.Combine(DATA_PATH, dir.Path.Replace('\\', '/')));
                     }
                 }
                 if(dir.LinkRecord != null)
                 {
-                    File.Delete(Path.Combine(REC_PATH, dir.LinkRecord.Path, dir.LinkRecord.Name) + ".json");
+                    File.Delete(Path.Combine(REC_PATH, dir.LinkRecord.Path.Replace('\\', '/'), dir.LinkRecord.Name) + ".json");
                 }
             }
         }
