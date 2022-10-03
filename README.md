@@ -1,7 +1,5 @@
 # LocalStorage
 
-This mod has not been tested on linux (it's probably broken).
-
 A [NeosModLoader](https://github.com/zkxs/NeosModLoader) mod for [Neos VR](https://neos.com/) that allows you to store items locally on your hard drive.<br>
 This mod adds a new section to the inventory that can be accessed by pressing the cloud button, called Local Storage.
 Any items saved to this section will be stored in a configurable path on your hard drive.<br>
