@@ -103,7 +103,25 @@ namespace LocalStorage
         [HarmonyPatch(typeof(InventoryBrowser))]
         class InventoryPatch
         {
-            // TODO: allow non logged in users to see the local storage (cloud button is unavailable)
+			
+            [HarmonyPatch("ShowInventoryOwners")]
+            [HarmonyPrefix]
+            public static bool ShowInventoriesPrefix(InventoryBrowser __instance)
+            {
+                if (!HIDE_LOCAL && __instance.Engine.Cloud.CurrentUser == null && __instance.CurrentDirectory.OwnerId != LOCAL_OWNER && __instance.World.IsUserspace())
+                {
+
+                    RecordDirectory directory = new RecordDirectory(LOCAL_OWNER, "Inventory", __instance.Engine, null);
+                    __instance.Open(directory, SlideSwapRegion.Slide.Left);
+                    return false;
+                } else if(__instance.CurrentDirectory.OwnerId == LOCAL_OWNER && __instance.Engine.Cloud.CurrentUser == null && __instance.World.IsUserspace())
+                {
+                    Traverse.Create(__instance).Method("TryInitialize").GetValue(null);
+                    return false;
+                }
+                return true;
+            }
+
             [HarmonyPatch("BeginGeneratingNewDirectory")]
             [HarmonyPostfix]
             public static void GenerationPostfix(InventoryBrowser __instance, UIBuilder __result)
@@ -116,6 +134,14 @@ namespace LocalStorage
 
                     builder.Button("Local Storage", colour, openFunc, LOCAL_OWNER, __instance.ActualDoublePressInterval);
                 }
+            }
+
+            [HarmonyPatch("OnChanges")]
+            [HarmonyPostfix]
+            public static void OnChangesPostFix(InventoryBrowser __instance, ref SyncRef<Button> ____inventoriesButton)
+            {
+                ____inventoriesButton.Target.Enabled = true;
+                return;
             }
 
             [HarmonyPatch("OnCommonUpdate")]
