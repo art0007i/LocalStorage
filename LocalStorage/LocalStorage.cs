@@ -1,26 +1,26 @@
 using HarmonyLib;
-using NeosModLoader;
+using ResoniteModLoader;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using FrooxEngine;
-using FrooxEngine.LogiX;
 using FrooxEngine.UIX;
-using BaseX;
+using Elements.Core;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 using LZ4;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace LocalStorage
 {
-    public class LocalStorage : NeosMod
+    public class LocalStorage : ResoniteMod
     {
         public override string Name => "LocalStorage";
         public override string Author => "art0007i";
-        public override string Version => "1.1.1";
+        public override string Version => "2.0.0";
         public override string Link => "https://github.com/art0007i/LocalStorage/";
 
         [AutoRegisterConfigKey]
@@ -36,10 +36,9 @@ namespace LocalStorage
 
         public override void OnEngineInit()
         {
+            config = GetConfiguration();
             Harmony harmony = new Harmony("me.art0007i.LocalStorage");
             harmony.PatchAll();
-
-            config = GetConfiguration();
         }
         public static ModConfiguration config;
 
@@ -124,15 +123,21 @@ namespace LocalStorage
 
             [HarmonyPatch("BeginGeneratingNewDirectory")]
             [HarmonyPostfix]
-            public static void GenerationPostfix(InventoryBrowser __instance, UIBuilder __result)
+            public static void GenerationPostfix(InventoryBrowser __instance, UIBuilder __result, ref GridLayout folders)
             {
                 if (!HIDE_LOCAL && __instance.CurrentDirectory == null && __instance.World.IsUserspace())
                 {
+                    UniLog.Log("hello gamer");
+                    UniLog.Log(folders.ToString());
+
                     var builder = __result;
-                    var colour = MathX.Lerp(color.Lime, color.White, 0.5f);
+                    builder.NestInto(folders.Slot);
+                    var colour = MathX.Lerp(colorX.Lime, colorX.Black, 0.5f);
                     var openFunc = (ButtonEventHandler<string>)AccessTools.Method(typeof(InventoryBrowser), "OpenInventory").CreateDelegate(typeof(ButtonEventHandler<string>), __instance);
 
                     builder.Button("Local Storage", colour, openFunc, LOCAL_OWNER, __instance.ActualDoublePressInterval);
+                    
+                    builder.NestOut();
                 }
             }
 
@@ -202,7 +207,7 @@ namespace LocalStorage
                         var p = Path.Combine(REC_PATH, path);
                         foreach (string dir in Directory.EnumerateDirectories(p))
                         {
-                            var dirRec = CloudX.Shared.RecordHelper.CreateForDirectory<Record>(LOCAL_OWNER, path, Path.GetFileNameWithoutExtension(dir));
+                            var dirRec = SkyFrost.Base.RecordHelper.CreateForDirectory<Record>(LOCAL_OWNER, path, Path.GetFileNameWithoutExtension(dir));
                             subdirs.Add(new RecordDirectory(dirRec, __instance, __instance.Engine));
                         }
                         foreach (string file in Directory.EnumerateFiles(p))
@@ -213,15 +218,11 @@ namespace LocalStorage
 
                             var fs = File.ReadAllText(file);
                             // Json parsing is difficult, ok
-                            var record = JsonConvert.DeserializeObject<CloudX.Shared.Record>(fs);
+                            var record = JsonConvert.DeserializeObject<SkyFrost.Base.Record>(fs);
 
                             garbo.RecordId = record.RecordId;
                             garbo.OwnerId = record.OwnerId;
                             garbo.AssetURI = record.AssetURI;
-                            garbo.GlobalVersion = record.GlobalVersion;
-                            garbo.LocalVersion = record.LocalVersion;
-                            garbo.LastModifyingUserId = record.LastModifyingUserId;
-                            garbo.LastModifyingMachineId = record.LastModifyingMachineId;
                             garbo.Name = record.Name;
                             garbo.Description = record.Description;
                             garbo.RecordType = record.RecordType;
@@ -240,7 +241,7 @@ namespace LocalStorage
                             garbo.Rating = record.Rating;
                             garbo.RandomOrder = record.RandomOrder;
                             garbo.Submissions = record.Submissions;
-                            garbo.NeosDBManifest = record.NeosDBManifest;
+                            garbo.AssetManifest = record.AssetManifest;
 
                             if(garbo.RecordType == "link")
                             {
@@ -276,22 +277,20 @@ namespace LocalStorage
                     var dataPath = savePath + ".json";
                     //var thumbPath = savePath + Path.GetExtension(thumbnail.ToString());
 
+                    UniLog.Log("SAVING " + objectData.ToString());
+
                     var dataTask = __instance.Engine.LocalDB.TryOpenAsset(objectData);
                     dataTask.Wait(); var dataStream = dataTask.Result;
-                    using (var ms = new LZ4Stream(dataStream, LZ4StreamMode.Decompress, LZ4StreamFlags.None))
-                    using (BsonDataReader reader = new BsonDataReader(ms))
-                    {
-                        // Use this for 7zBSON files
-                        // whenever I try to save anything it seems to be lz4BSON so dont need it rn
-                        // SevenZip.Helper.Decompress(dataStream, ms);
+                    
 
-                        JsonSerializer serializer = new JsonSerializer();
-                        var ser = serializer.Deserialize(reader);
-                        serializer.Formatting = Formatting.Indented;
-                        using (var fs = File.CreateText(dataPath))
-                        {
-                            serializer.Serialize(fs, ser);
-                        }
+                    var tree = DataTreeConverter.LoadAuto(dataStream);
+                    using (var fs = File.CreateText(dataPath))
+                    {
+                        var wr = new JsonTextWriter(fs);
+                        wr.Indentation = 2;
+                        wr.Formatting = Formatting.Indented;
+                        var writeFunc = AccessTools.Method(typeof(DataTreeConverter), "Write");
+                        writeFunc.Invoke(null, new object[] { tree, wr});
                     }
                     /*
                         Currently I have no interest in digging into the internals of the asset variant system
@@ -311,7 +310,7 @@ namespace LocalStorage
                     //var thumbLocalPath = "lstore:///" + __instance.ChildRecordPath + "/" + name + Path.GetExtension(thumbnail.ToString());
                     var thumbLocalPath = thumbnail.ToString();
 
-                    var rec = CloudX.Shared.RecordHelper.CreateForObject<Record>(name, __instance.OwnerId, fileLocalPath, thumbLocalPath);
+                    var rec = SkyFrost.Base.RecordHelper.CreateForObject<Record>(name, __instance.OwnerId, fileLocalPath, thumbLocalPath);
                     rec.Path = __instance.ChildRecordPath;
                     if (tags != null)
                     {
@@ -345,7 +344,7 @@ namespace LocalStorage
                     {
                         throw new Exception("Subdirectory with name '" + name + "' already exists.");
                     }
-                    var rec = CloudX.Shared.RecordHelper.CreateForDirectory<Record>(LOCAL_OWNER, __instance.ChildRecordPath, name);
+                    var rec = SkyFrost.Base.RecordHelper.CreateForDirectory<Record>(LOCAL_OWNER, __instance.ChildRecordPath, name);
                     if (!dummyOnly)
                     {
                         Directory.CreateDirectory(dirLoc);
@@ -366,7 +365,7 @@ namespace LocalStorage
                 if (__instance.OwnerId == LOCAL_OWNER)
                 {
                     var fixedPath = __instance.ChildRecordPath.Replace('\\', '/');
-                    Record record = CloudX.Shared.RecordHelper.CreateForLink<Record>(name, __instance.OwnerId, target.ToString(), null);
+                    Record record = SkyFrost.Base.RecordHelper.CreateForLink<Record>(name, __instance.OwnerId, target.ToString(), null);
                     record.Path = __instance.ChildRecordPath;
 
                     var recPath = Path.Combine(REC_PATH, fixedPath, name + ".json");
@@ -467,7 +466,7 @@ namespace LocalStorage
         [HarmonyPatch(typeof(AssetManager))]
         class AssetManagerPatch
         {
-            [HarmonyPatch("RequestGather")]
+            [HarmonyPatch("GatherAssetFile")]
             [HarmonyPrefix]
             public static bool RequestGather(Uri assetURL, ref ValueTask<string> __result)
             {
@@ -479,6 +478,30 @@ namespace LocalStorage
                 return true;
             }
         }
+
+        [HarmonyPatch(typeof(DataTreeConverter), nameof(DataTreeConverter.Load), new Type[] { typeof(string), typeof(string) } )]
+        class JsonSupportAdding
+        {
+            public static bool Prefix(string file, string ext, ref DataTreeDictionary __result)
+            {
+                if(ext == null)
+                {
+                    ext = Path.GetExtension(file).ToLower().Replace(".", "");
+                }
+                if (ext == "json")
+                {
+                    using (var fileReader = File.OpenText(file))
+                    using (var jsonReader = new JsonTextReader(fileReader))
+                    {
+                        var readFunc = AccessTools.Method(typeof(DataTreeConverter), "Read");
+                        __result = (DataTreeDictionary)readFunc.Invoke(null, new object[] { jsonReader });
+                    }
+                    return false;
+                }
+                return true;
+            }
+        }
+
         /*
          * World saving stuff, currently completely broken
          * 
@@ -566,7 +589,7 @@ namespace LocalStorage
                             record.Tags = _tags;
                             record.AssetURI = uri.ToString();
                             record.RecordType = "world";
-                            Uri sourceURL = CloudX.Shared.RecordUtil.GenerateUri(record.OwnerId, record.RecordId);
+                            Uri sourceURL = SkyFrost.Base.RecordUtil.GenerateUri(record.OwnerId, record.RecordId);
                             if (world.CorrespondingRecord == record)
                             {
                                 world.SourceURL = sourceURL;
