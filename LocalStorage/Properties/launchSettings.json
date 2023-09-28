@@ -3,7 +3,7 @@
     "Launch Neos": {
       "commandName": "Executable",
       "executablePath": "$(GamePath)Resonite.exe",
-      "commandLineArgs": "-DataPath \"D:\\YDMS\\Resonite Data\" -CachePath \"D:\\YDMS\\Resonite Cache\" -Screen -Invisible -LoadAssembly \"Libraries/ResoniteModLoader.dll\" -DontAutoOpenCloudHome",
+      "commandLineArgs": "-DataPath \"D:\\YDMS\\Resonite Data\" -CachePath \"D:\\YDMS\\Resonite Cache\" -Screen -Invisible -LoadAssembly \"Libraries/ResoniteModLoader.dll\" -DoNotAutoLoadHome",
       "workingDirectory": "$(GamePath)"
     }
   }
