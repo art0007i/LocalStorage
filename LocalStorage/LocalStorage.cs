@@ -2,7 +2,7 @@ using HarmonyLib;
 using ResoniteModLoader;
 using System;
 using System.Linq;
-using System.Reflection;
+using FrooxEngine.Store;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using FrooxEngine;
@@ -10,9 +10,6 @@ using FrooxEngine.UIX;
 using Elements.Core;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
-using LZ4;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace LocalStorage
 {
@@ -20,7 +17,7 @@ namespace LocalStorage
     {
         public override string Name => "LocalStorage";
         public override string Author => "art0007i";
-        public override string Version => "2.0.0";
+        public override string Version => "2.0.1";
         public override string Link => "https://github.com/art0007i/LocalStorage/";
 
         [AutoRegisterConfigKey]
