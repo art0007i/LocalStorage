@@ -17,7 +17,7 @@ namespace LocalStorage
     {
         public override string Name => "LocalStorage";
         public override string Author => "art0007i";
-        public override string Version => "2.0.1";
+        public override string Version => "2.0.2";
         public override string Link => "https://github.com/art0007i/LocalStorage/";
 
         [AutoRegisterConfigKey]
@@ -91,7 +91,7 @@ namespace LocalStorage
                         Error(e);
                     }
                 }
-                Debug("Initalized LocalStorage\nData Path: " + DATA_PATH + "\nRecord Path: " + REC_PATH);
+                Msg("Initalized LocalStorage\nData Path: " + DATA_PATH + "\nRecord Path: " + REC_PATH);
                 HIDE_LOCAL = false;
             }
         }
@@ -124,9 +124,6 @@ namespace LocalStorage
             {
                 if (!HIDE_LOCAL && __instance.CurrentDirectory == null && __instance.World.IsUserspace())
                 {
-                    UniLog.Log("hello gamer");
-                    UniLog.Log(folders.ToString());
-
                     var builder = __result;
                     builder.NestInto(folders.Slot);
                     var colour = MathX.Lerp(colorX.Lime, colorX.Black, 0.5f);
@@ -161,7 +158,7 @@ namespace LocalStorage
         }
 
         // TODO: Test on linux
-        // High chance it breaks because the neos inventory uses backslashes internally
+        // High chance it breaks because the resonite inventory uses backslashes internally
         [HarmonyPatch(typeof(RecordDirectory))]
         class RecordDirectoryPatch
         {
@@ -274,7 +271,7 @@ namespace LocalStorage
                     var dataPath = savePath + ".json";
                     //var thumbPath = savePath + Path.GetExtension(thumbnail.ToString());
 
-                    UniLog.Log("SAVING " + objectData.ToString());
+                    Debug("SAVING " + objectData.ToString());
 
                     var dataTask = __instance.Engine.LocalDB.TryOpenAsset(objectData);
                     dataTask.Wait(); var dataStream = dataTask.Result;
