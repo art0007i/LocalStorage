@@ -12,7 +12,7 @@ A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoade
 <li> You can save items with the same name into the same folder.</li>
 <li>Item thumbnails are saved to a dedicated folder since I like to clear the cache that Resonite dumps in the <b>AppData\LocalLow</b> folder.</li>
 <li>Folder names have invalid characters removed from them automatically, this is reflected in Resonite. Resonite allowed file/folder names with characters that Windows does not allow in paths.</li>
-<li>The <b>Local Storage</b> button is now blue, I just like it but maybe I'll change it just to keep you on your toes, who knows. 
+<li>The <b>Local Storage</b> button is now brick red, I just like it but maybe I'll change it just to keep you on your toes, who knows.
 </ul>
 </figure>
 

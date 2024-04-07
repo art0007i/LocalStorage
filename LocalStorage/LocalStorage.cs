@@ -93,7 +93,7 @@ namespace LocalStorage
         // Strip out invailid characters to make the Resonite item more likely to save correctly.
 
         // --- Blacklist of chars which you cannot have in file names
-        private static readonly char[] blacklist = { '<', '>', '"', '\'', '\\', '/', '%', '{', '}', '*', '?', ':', '|', '=', ' '};
+        private static readonly char[] blacklist = { '<', '>', '"', '\'', '\\', '/', '%', '{', '}', '*', '?', ':', '|'};
 
         // --- Define the regular expression pattern to match emojis
         private static readonly string emojiPattern = @"\p{So}";
@@ -261,7 +261,8 @@ namespace LocalStorage
                     var builder = __result;
                     builder.NestInto(folders.Slot);
 
-                    var colour = MathX.Lerp(new Elements.Core.colorX(0.419608f, 0.725490f, 0.996078f), colorX.Black, 0.5f);
+                    //var colour = MathX.Lerp(new Elements.Core.colorX(0.419608f, 0.725490f, 0.996078f), colorX.Black, 0.5f);
+                    var colour = MathX.Lerp(new Elements.Core.colorX(0.95683f, 0.529411f, 0.529411f), colorX.Black, 0.5f);
 
                     var openFunc = (ButtonEventHandler<string>)AccessTools.Method(typeof(InventoryBrowser), "OpenInventory").CreateDelegate(typeof(ButtonEventHandler<string>), __instance);
 
