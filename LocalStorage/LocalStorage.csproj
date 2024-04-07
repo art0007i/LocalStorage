@@ -1,61 +1,83 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <ProjectGuid>{FFA93FA9-4040-46FF-8A1C-2A190C0CC235}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{215F66B7-DE67-4990-A6ED-0F4C7388D631}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LocalStorage</RootNamespace>
-    <AssemblyTitle>LocalStorage</AssemblyTitle>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>LocalStorage</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <GamePath>$(MSBuildThisFileDirectory)Resonite</GamePath>
-    <GamePath Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Resonite\')">C:\Program Files (x86)\Steam\steamapps\common\Resonite\</GamePath>
-    <GamePath Condition="Exists('$(HOME)/.steam/steam/steamapps/common/Resonite/')">$(HOME)/.steam/steam/steamapps/common/Resonite/</GamePath>
-	<GamePath Condition="Exists('E:\Programs\Steam\steamapps\common\Resonite')">E:\Programs\Steam\steamapps\common\Resonite\</GamePath>
-    <CopyLocal>false</CopyLocal>
-    <CopyToMods Condition="'$(CopyToMods)'==''">true</CopyToMods>
-    <DebugSymbols Condition="'$(Configuration)'=='Release'">false</DebugSymbols>
-    <DebugType Condition="'$(Configuration)'=='Release'">None</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="HarmonyLib">
-      <HintPath>$(GamePath)rml_libs\0Harmony.dll</HintPath>
-      <HintPath Condition="Exists('$(GamePath)0Harmony.dll')">$(GamePath)0Harmony.dll</HintPath>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\Desktop\resonite files\modtools\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Elements.Core">
-      <HintPath>$(GamePath)Resonite_Data\Managed\Elements.Core.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\resonite files\Managed\Elements.Core.dll</HintPath>
     </Reference>
     <Reference Include="FrooxEngine">
-      <HintPath>$(GamePath)Resonite_Data\Managed\FrooxEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\resonite files\Managed\FrooxEngine.dll</HintPath>
     </Reference>
     <Reference Include="FrooxEngine.Store">
-      <HintPath>$(GamePath)Resonite_Data\Managed\FrooxEngine.Store.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\resonite files\Managed\FrooxEngine.Store.dll</HintPath>
     </Reference>
-	<Reference Include="SkyFrost.Base">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\SkyFrost.Base.dll</HintPath>
-	</Reference>
-	<Reference Include="SevenZip">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\LZMA.dll</HintPath>
-	</Reference>
-	<Reference Include="LZ4">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\LZ4.dll</HintPath>
-	</Reference>
-	<Reference Include="System.Threading.Tasks.Extensions">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\System.Threading.Tasks.Extensions.dll</HintPath>
-	</Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\resonite files\Managed\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json.Bson">
+      <HintPath>..\..\..\..\Desktop\resonite files\Managed\Newtonsoft.Json.Bson.dll</HintPath>
+    </Reference>
     <Reference Include="ResoniteModLoader">
-      <HintPath>$(GamePath)ResoniteModLoader.dll</HintPath>
-      <HintPath>$(GamePath)Libraries\ResoniteModLoader.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\resonite files\modtools\ResoniteModLoader.dll</HintPath>
     </Reference>
+    <Reference Include="SkyFrost.Base">
+      <HintPath>..\..\..\..\Desktop\resonite files\Managed\SkyFrost.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\resonite files\Managed\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(CopyToMods)'=='true'">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GamePath)rml_mods" />
-    <Message Text="Copied $(TargetFileName) to $(GamePath)rml_mods" Importance="high" />
-  </Target>
+  <ItemGroup>
+    <Compile Include="LocalStorage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
