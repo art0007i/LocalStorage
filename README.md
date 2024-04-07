@@ -2,8 +2,9 @@
 
 A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader) mod for [Resonite](https://resonite.com/) that allows you to store items locally on your hard drive.<br>
 
->[!Note]
->Updated by Calamity Lime, pretty much the same as the original [Local Storage Mod](https://github.com/art0007i/LocalStorage) by art0007i but with some minor changes to suit me a bit better. This is a drop in compatible with the original Local Storage Mod and <i>should</i> work the other way as well just losing the thumbnails but no promises there. 
+> [!Note]
+> Updated by Calamity Lime, pretty much the same as the original [Local Storage Mod](https://github.com/art0007i/LocalStorage) by art0007i but with some minor changes to suit me a bit better. This is a drop in compatible with the original Local Storage Mod and <i>should</i> work the other way as well just losing the thumbnails but no promises there. 
+> <b>Also important to know:</b> I didn't test this that much, it should work fine but I could have missed something small.
 
 <figure>
 <figcaption><span class="label"><b>List of Changes:</b></span> </figcaption>
