@@ -13,10 +13,10 @@ A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoade
 <li>Folder names have invalid characters removed from them automatically, this is reflected in Resonite. Resonite allowed file/folder names with characters that Windows does not allow in paths.</li>
 <li>The <b>Local Storage</b> button is now blue, I just like it. 
 </ul>
-</figure
+</figure>
 
 > [!IMPORTANT]
-> You might be wondering why I don't push my changes back to art0007i's GitHub repo, I'm just too lazy to figure out how to do that. I know how to fork and do my own thing. 
+> You might be wondering why I don't push my changes back to art0007i's GitHub repo, I'm just too lazy to figure out how to do that. I know how to fork and do my own thing, so I'll do that thanks.
 
 > [!WARNING]
 > This mod does not manage assets. If you have an item it will be saved as-is, so cloud assets will remain cloud assets and local assets will remain local assets.
