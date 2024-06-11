@@ -39,6 +39,9 @@
 	<Reference Include="SkyFrost.Base">
 	  <HintPath>$(GamePath)Resonite_Data\Managed\SkyFrost.Base.dll</HintPath>
 	</Reference>
+	<Reference Include="SkyFrost.Base.Models">
+	  <HintPath>$(GamePath)Resonite_Data\Managed\SkyFrost.Base.Models.dll</HintPath>
+	</Reference>
 	<Reference Include="SevenZip">
 	  <HintPath>$(GamePath)Resonite_Data\Managed\LZMA.dll</HintPath>
 	</Reference>

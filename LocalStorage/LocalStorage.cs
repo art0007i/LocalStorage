@@ -17,7 +17,7 @@ namespace LocalStorage
     {
         public override string Name => "LocalStorage";
         public override string Author => "art0007i";
-        public override string Version => "2.0.2";
+        public override string Version => "2.0.3";
         public override string Link => "https://github.com/art0007i/LocalStorage/";
 
         [AutoRegisterConfigKey]
@@ -269,7 +269,7 @@ namespace LocalStorage
                     var fixedPath = __instance.ChildRecordPath.Replace('\\', '/');
                     var savePath = Path.Combine(DATA_PATH, fixedPath, name);
                     var dataPath = savePath + ".json";
-                    //var thumbPath = savePath + Path.GetExtension(thumbnail.ToString());
+                    var thumbPath = savePath + Path.GetExtension(thumbnail.ToString());
 
                     Debug("SAVING " + objectData.ToString());
 
@@ -290,7 +290,7 @@ namespace LocalStorage
                         Currently I have no interest in digging into the internals of the asset variant system
                         and it seems I would need to in order to save thumbnails and assets for items
                         right now they will be stored in either the cache or local db (default behaviour)
-
+                    */
                     if (thumbnail != null)
                     {
                         var thumbTask = __instance.Engine.LocalDB.TryOpenAsset(thumbnail);
@@ -299,10 +299,10 @@ namespace LocalStorage
                         thumbStream.CopyTo(thumbFile);
                         thumbFile.Flush(); thumbFile.Dispose();
                     }
-                    */
+
                     var fileLocalPath = "lstore:///" + fixedPath + "/" + name + ".json";
-                    //var thumbLocalPath = "lstore:///" + __instance.ChildRecordPath + "/" + name + Path.GetExtension(thumbnail.ToString());
-                    var thumbLocalPath = thumbnail.ToString();
+                    var thumbLocalPath = "lstore:///" + fixedPath + "/" + name + Path.GetExtension(thumbnail.ToString());
+                    //var thumbLocalPath = thumbnail.ToString();
 
                     var rec = SkyFrost.Base.RecordHelper.CreateForObject<Record>(name, __instance.OwnerId, fileLocalPath, thumbLocalPath);
                     rec.Path = __instance.ChildRecordPath;
