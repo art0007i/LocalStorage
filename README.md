@@ -1,6 +1,10 @@
 # LocalStorage
 
 A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoader) mod for [Resonite](https://resonite.com/) that allows you to store items locally on your hard drive.<br>
+
+> [!WARNING]
+> This mod does not manage assets. If you have an item it will be saved as-is, so cloud assets will remain cloud assets and local assets will remain local assets.
+
 This mod adds a new section to the inventory that can be accessed by pressing the cloud button, called Local Storage.
 Any items saved to this section will be stored in a configurable path on your hard drive.<br>
 It is possible to manually add/edit items and directories but make sure you know exactly what you are doing because things might break.
