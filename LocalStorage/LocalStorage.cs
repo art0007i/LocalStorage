@@ -409,7 +409,16 @@ namespace LocalStorage
 
                         // this is not the smartest system,
                         // if a user manually creates a record that is in the wrong path and wrong name it could be bad
-                        File.Delete(Path.Combine(REC_PATH, record.Path.Replace('\\', '/'), record.RecordId) + ".json");
+                        var path = Path.Combine(REC_PATH, record.Path.Replace('\\', '/'), record.RecordId) + ".json";
+                        if (File.Exists(path))
+                        {
+                            File.Delete(path);
+                        }
+                        else
+                        {
+                            path = Path.Combine(REC_PATH, record.Path.Replace('\\', '/'), record.Name) + ".json";
+                            File.Delete(path);
+                        }
                     }
                     __result = test;
                     return false;
@@ -455,7 +464,16 @@ namespace LocalStorage
                 }
                 if(dir.LinkRecord != null)
                 {
-                    File.Delete(Path.Combine(REC_PATH, dir.LinkRecord.Path.Replace('\\', '/'), dir.LinkRecord.RecordId) + ".json");
+                    var path = Path.Combine(REC_PATH, dir.LinkRecord.Path.Replace('\\', '/'), dir.LinkRecord.RecordId) + ".json";
+                    if (Directory.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                    else
+                    {
+                        path = Path.Combine(REC_PATH, dir.LinkRecord.Path.Replace('\\', '/'), dir.LinkRecord.Name) + ".json";
+                        File.Delete(path);
+                    }
                 }
             }
         }
