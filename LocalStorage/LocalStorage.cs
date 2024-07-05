@@ -406,6 +406,12 @@ namespace LocalStorage
                             var file = ResolveLstore(asset);
                             File.Delete(file);
                         }
+                        var thumbnail = new Uri(record.ThumbnailURI);
+                        if (thumbnail.Scheme == "lstore")
+                        {
+                            var file = ResolveLstore(thumbnail);
+                            File.Delete(file);
+                        }
 
                         // this is not the smartest system,
                         // if a user manually creates a record that is in the wrong path and wrong name it could be bad
