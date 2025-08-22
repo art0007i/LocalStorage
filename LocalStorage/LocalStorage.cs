@@ -17,7 +17,7 @@ namespace LocalStorage
     {
         public override string Name => "LocalStorage";
         public override string Author => "art0007i";
-        public override string Version => "2.0.3";
+        public override string Version => "2.0.4";
         public override string Link => "https://github.com/art0007i/LocalStorage/";
 
         [AutoRegisterConfigKey]
@@ -36,6 +36,35 @@ namespace LocalStorage
             config = GetConfiguration();
             Harmony harmony = new Harmony("me.art0007i.LocalStorage");
             harmony.PatchAll();
+
+            Engine.Current.OnReady += () => {
+                Debug("Creating local storage directories");
+
+                REC_PATH = config.GetValue(REC_PATH_KEY).Replace('\\', '/');
+                DATA_PATH = config.GetValue(DATA_PATH_KEY).Replace('\\', '/');
+                if (!Directory.Exists(REC_PATH))
+                {
+                    try { Directory.CreateDirectory(Path.Combine(REC_PATH, "Inventory")); }
+                    catch (Exception e)
+                    {
+                        HIDE_LOCAL = true;
+                        Error("A critical error has occured while creating record directory");
+                        Error(e);
+                    }
+                }
+                if (!Directory.Exists(DATA_PATH))
+                {
+                    try { Directory.CreateDirectory(Path.Combine(DATA_PATH, "Inventory")); }
+                    catch (Exception e)
+                    {
+                        HIDE_LOCAL = true;
+                        Error("A critical error has occured while creating data directory");
+                        Error(e);
+                    }
+                }
+                Msg("Initalized LocalStorage\nData Path: " + DATA_PATH + "\nRecord Path: " + REC_PATH);
+                HIDE_LOCAL = false;
+            };
         }
         public static ModConfiguration config;
 
@@ -64,53 +93,19 @@ namespace LocalStorage
             }
         }
 
-        [HarmonyPatch(typeof(LocalDB), "Initialize")]
-        class LateInitPatch
-        {
-            public static void Postfix()
-            {
-                REC_PATH = config.GetValue(REC_PATH_KEY).Replace('\\', '/');
-                DATA_PATH = config.GetValue(DATA_PATH_KEY).Replace('\\', '/');
-                if (!Directory.Exists(REC_PATH))
-                {
-                    try { Directory.CreateDirectory(Path.Combine(REC_PATH, "Inventory")); }
-                    catch (Exception e)
-                    {
-                        HIDE_LOCAL = true;
-                        Error("A critical error has occured while creating record directory");
-                        Error(e);
-                    }
-                }
-                if (!Directory.Exists(DATA_PATH))
-                {
-                    try { Directory.CreateDirectory(Path.Combine(DATA_PATH, "Inventory")); }
-                    catch (Exception e)
-                    {
-                        HIDE_LOCAL = true;
-                        Error("A critical error has occured while creating data directory");
-                        Error(e);
-                    }
-                }
-                Msg("Initalized LocalStorage\nData Path: " + DATA_PATH + "\nRecord Path: " + REC_PATH);
-                HIDE_LOCAL = false;
-            }
-        }
-
         [HarmonyPatch(typeof(InventoryBrowser))]
         class InventoryPatch
         {
-			
             [HarmonyPatch("ShowInventoryOwners")]
             [HarmonyPrefix]
             public static bool ShowInventoriesPrefix(InventoryBrowser __instance)
             {
-                if (!HIDE_LOCAL && __instance.Engine.Cloud.CurrentUser == null && __instance.CurrentDirectory.OwnerId != LOCAL_OWNER && __instance.World.IsUserspace())
+                if (!HIDE_LOCAL && __instance?.Engine?.Cloud?.CurrentUser == null && __instance?.CurrentDirectory?.OwnerId != LOCAL_OWNER && __instance.World.IsUserspace())
                 {
-
                     RecordDirectory directory = new RecordDirectory(LOCAL_OWNER, "Inventory", __instance.Engine, null);
                     __instance.Open(directory, SlideSwapRegion.Slide.Left);
                     return false;
-                } else if(__instance.CurrentDirectory.OwnerId == LOCAL_OWNER && __instance.Engine.Cloud.CurrentUser == null && __instance.World.IsUserspace())
+                } else if(__instance?.CurrentDirectory?.OwnerId == LOCAL_OWNER && __instance?.Engine?.Cloud?.CurrentUser == null && __instance.World.IsUserspace())
                 {
                     Traverse.Create(__instance).Method("TryInitialize").GetValue(null);
                     return false;

@@ -6,7 +6,7 @@
     <RootNamespace>LocalStorage</RootNamespace>
     <AssemblyTitle>LocalStorage</AssemblyTitle>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <GamePath>$(MSBuildThisFileDirectory)Resonite</GamePath>
@@ -28,28 +28,25 @@
       <HintPath Condition="Exists('$(GamePath)0Harmony.dll')">$(GamePath)0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Elements.Core">
-      <HintPath>$(GamePath)Resonite_Data\Managed\Elements.Core.dll</HintPath>
+      <HintPath>$(GamePath)Elements.Core.dll</HintPath>
     </Reference>
     <Reference Include="FrooxEngine">
-      <HintPath>$(GamePath)Resonite_Data\Managed\FrooxEngine.dll</HintPath>
+      <HintPath>$(GamePath)FrooxEngine.dll</HintPath>
     </Reference>
     <Reference Include="FrooxEngine.Store">
-      <HintPath>$(GamePath)Resonite_Data\Managed\FrooxEngine.Store.dll</HintPath>
+      <HintPath>$(GamePath)FrooxEngine.Store.dll</HintPath>
     </Reference>
 	<Reference Include="SkyFrost.Base">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\SkyFrost.Base.dll</HintPath>
+	  <HintPath>$(GamePath)SkyFrost.Base.dll</HintPath>
 	</Reference>
 	<Reference Include="SkyFrost.Base.Models">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\SkyFrost.Base.Models.dll</HintPath>
+	  <HintPath>$(GamePath)SkyFrost.Base.Models.dll</HintPath>
 	</Reference>
 	<Reference Include="SevenZip">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\LZMA.dll</HintPath>
+	  <HintPath>$(GamePath)LZMA.dll</HintPath>
 	</Reference>
 	<Reference Include="LZ4">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\LZ4.dll</HintPath>
-	</Reference>
-	<Reference Include="System.Threading.Tasks.Extensions">
-	  <HintPath>$(GamePath)Resonite_Data\Managed\System.Threading.Tasks.Extensions.dll</HintPath>
+	  <HintPath>$(GamePath)LZ4.dll</HintPath>
 	</Reference>
     <Reference Include="ResoniteModLoader">
       <HintPath>$(GamePath)ResoniteModLoader.dll</HintPath>
