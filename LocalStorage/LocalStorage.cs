@@ -261,8 +261,9 @@ namespace LocalStorage
 
                 if (__instance.OwnerId == LOCAL_OWNER)
                 {
+                    var recordId = SkyFrost.Base.RecordHelper.GenerateRecordID();
                     var fixedPath = __instance.ChildRecordPath.Replace('\\', '/');
-                    var savePath = Path.Combine(DATA_PATH, fixedPath, name);
+                    var savePath = Path.Combine(DATA_PATH, fixedPath, recordId);
                     var dataPath = savePath + ".json";
                     var thumbPath = savePath + Path.GetExtension(thumbnail.ToString());
 
@@ -295,18 +296,18 @@ namespace LocalStorage
                         thumbFile.Flush(); thumbFile.Dispose();
                     }
 
-                    var fileLocalPath = "lstore:///" + fixedPath + "/" + name + ".json";
-                    var thumbLocalPath = "lstore:///" + fixedPath + "/" + name + Path.GetExtension(thumbnail.ToString());
+                    var fileLocalPath = "lstore:///" + fixedPath + "/" + recordId + ".json";
+                    var thumbLocalPath = "lstore:///" + fixedPath + "/" + recordId + Path.GetExtension(thumbnail.ToString());
                     //var thumbLocalPath = thumbnail.ToString();
 
-                    var rec = SkyFrost.Base.RecordHelper.CreateForObject<Record>(name, __instance.OwnerId, fileLocalPath, thumbLocalPath);
+                    var rec = SkyFrost.Base.RecordHelper.CreateForObject<Record>(name, __instance.OwnerId, fileLocalPath, thumbLocalPath, recordId);
                     rec.Path = __instance.ChildRecordPath;
                     if (tags != null)
                     {
                         rec.Tags = new HashSet<string>(tags);
                     }
 
-                    var recPath = Path.Combine(REC_PATH, fixedPath, name + ".json");
+                    var recPath = Path.Combine(REC_PATH, fixedPath, recordId + ".json");
                     using (var fs = File.CreateText(recPath))
                     {
                         JsonSerializer serializer = new JsonSerializer();
@@ -353,11 +354,12 @@ namespace LocalStorage
             {
                 if (__instance.OwnerId == LOCAL_OWNER)
                 {
+                    var recordId = SkyFrost.Base.RecordHelper.GenerateRecordID();
                     var fixedPath = __instance.ChildRecordPath.Replace('\\', '/');
-                    Record record = SkyFrost.Base.RecordHelper.CreateForLink<Record>(name, __instance.OwnerId, target.ToString(), null);
+                    Record record = SkyFrost.Base.RecordHelper.CreateForLink<Record>(name, __instance.OwnerId, target.ToString(), recordId);
                     record.Path = __instance.ChildRecordPath;
 
-                    var recPath = Path.Combine(REC_PATH, fixedPath, name + ".json");
+                    var recPath = Path.Combine(REC_PATH, fixedPath, recordId + ".json");
                     using (var fs = File.CreateText(recPath))
                     {
                         JsonSerializer serializer = new JsonSerializer();
@@ -399,10 +401,25 @@ namespace LocalStorage
                             var file = ResolveLstore(asset);
                             File.Delete(file);
                         }
+                        var thumbnail = new Uri(record.ThumbnailURI);
+                        if (thumbnail.Scheme == "lstore")
+                        {
+                            var file = ResolveLstore(thumbnail);
+                            File.Delete(file);
+                        }
 
                         // this is not the smartest system,
                         // if a user manually creates a record that is in the wrong path and wrong name it could be bad
-                        File.Delete(Path.Combine(REC_PATH, record.Path.Replace('\\', '/'), record.Name) + ".json");
+                        var path = Path.Combine(REC_PATH, record.Path.Replace('\\', '/'), record.RecordId) + ".json";
+                        if (File.Exists(path))
+                        {
+                            File.Delete(path);
+                        }
+                        else
+                        {
+                            path = Path.Combine(REC_PATH, record.Path.Replace('\\', '/'), record.Name) + ".json";
+                            File.Delete(path);
+                        }
                     }
                     __result = test;
                     return false;
@@ -448,7 +465,16 @@ namespace LocalStorage
                 }
                 if(dir.LinkRecord != null)
                 {
-                    File.Delete(Path.Combine(REC_PATH, dir.LinkRecord.Path.Replace('\\', '/'), dir.LinkRecord.Name) + ".json");
+                    var path = Path.Combine(REC_PATH, dir.LinkRecord.Path.Replace('\\', '/'), dir.LinkRecord.RecordId) + ".json";
+                    if (Directory.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                    else
+                    {
+                        path = Path.Combine(REC_PATH, dir.LinkRecord.Path.Replace('\\', '/'), dir.LinkRecord.Name) + ".json";
+                        File.Delete(path);
+                    }
                 }
             }
         }
