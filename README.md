@@ -4,6 +4,8 @@ A [ResoniteModLoader](https://github.com/resonite-modding-group/ResoniteModLoade
 
 > [!WARNING]
 > This mod does not manage assets. If you have an item it will be saved as-is, so cloud assets will remain cloud assets and local assets will remain local assets.
+>
+> Also saving trying to save items with invalid path characters in their name is not supported.
 
 This mod adds a new section to the inventory that can be accessed by pressing the cloud button, called Local Storage.
 Any items saved to this section will be stored in a configurable path on your hard drive.<br>
