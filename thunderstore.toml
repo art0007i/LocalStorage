@@ -1,0 +1,43 @@
+# This file is used by the Thunderstore CLI to build and publish your mod to Thunderstore. https://github.com/thunderstore-io/thunderstore-cli
+
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "art0007i"
+name = "LocalStorage"
+description = "Allows you to store items locally on your hard drive (Kinda, check README before using)"
+websiteUrl = "https://github.com/art0007i/LocalStorage"
+containsNsfwContent = false
+
+[package.dependencies] 
+ResoniteModding-BepisLoader = "1.5.1"
+ResoniteModding-BepisResoniteWrapper = "1.0.2"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./Plugin/bin/Release/LocalStorage.dll"
+target = "plugins/LocalStorage/"
+
+[[build.copy]]
+source = "./Plugin/bin/Release/LocalStorage.pdb"
+target = "plugins/LocalStorage/"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "/"
+
+[[build.copy]]
+source = "./LICENSE"
+target = "/"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["resonite"]
+
+[publish.categories]
+resonite = [ "mods" ] # TODO: Change this to your mod's categories, see https://thunderstore.io/api/experimental/community/resonite/category/ for a list of available categories

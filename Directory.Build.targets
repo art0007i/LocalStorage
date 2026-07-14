@@ -1,0 +1,33 @@
+<Project>
+  <!--
+    Build Thunderstore package by calling `dotnet build -c Release -target:PackTS -v d` (verbosity detailed).
+    Publish to Thunderstore by including `-property:PublishTS=true` in the command.
+  -->
+  <Target Name="PackTS" DependsOnTargets="Build">
+    <CallTarget Targets="PackTS_Execute" Condition="'$(ThunderstorePackable)' == 'true' and '$(Configuration)' == 'Release'" />
+  </Target>
+
+  <!--
+    Install to gale by calling `dotnet build -c Release -target:InstallGale -v d`
+  -->
+  <Target Name="InstallGale" DependsOnTargets="Build">
+    <CallTarget Targets="PackTS_Execute" Condition="'$(ThunderstorePackable)' == 'true' and '$(Configuration)' == 'Release'" />
+    <PropertyGroup>
+      <TcliPackageId>$([System.String]::new('$(PackageId)').Replace('.', '-'))</TcliPackageId>
+      <PackagePath>$(MSBuildThisFileDirectory)/build/$(TcliPackageId)-$(Version).zip</PackagePath>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(PackagePath)')" Text="Could not find built package at expected path: $(PackagePath) (maybe you forgot to change the version number in 'thunderstore.toml'?)" />
+    <Exec Condition="Exists('$(PackagePath)')" Command="gale --game resonite --profile Default --install '$(PackagePath)'" />
+  </Target>
+
+
+  <Target Name="PackTS_Execute">
+    <PropertyGroup>
+      <BuildArgument Condition="'$(PublishTS)' != 'true'">build</BuildArgument>
+      <BuildArgument Condition="'$(PublishTS)' == 'true'">publish</BuildArgument>
+    </PropertyGroup>
+
+    <Exec Command="dotnet tool restore" WorkingDirectory="$(SolutionDir)" />
+    <Exec Command="dotnet tcli $(BuildArgument) --package-version $(Version)" WorkingDirectory="$(SolutionDir)" />
+  </Target>
+</Project>
