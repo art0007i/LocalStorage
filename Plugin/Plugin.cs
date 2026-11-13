@@ -189,11 +189,11 @@ public class Plugin : BasePlugin
 
         [HarmonyPatch("TryLocalCacheLoad")]
         [HarmonyPrefix]
-        public static bool CacheLoad(ref Task<bool> __result, RecordDirectory __instance)
+        public static bool CacheLoad(ref bool __result, RecordDirectory __instance)
         {
             if (__instance.OwnerId == LOCAL_OWNER)
             {
-                __result = Task<bool>.Run(() => false);
+                __result = false;
                 return false;
             }
 
@@ -202,70 +202,68 @@ public class Plugin : BasePlugin
 
         [HarmonyPatch("LoadFrom", new Type[] { typeof(string), typeof(string) })]
         [HarmonyPrefix]
-        public static bool LoadFrom(string ownerId, string path, ref Task __result, RecordDirectory __instance)
+        public static bool LoadFrom(string ownerId, string path, RecordDirectory __instance)
         {
             if (ownerId == LOCAL_OWNER)
             {
-                __result = Task.Run(() =>
+                List<RecordDirectory> subdirs = new List<RecordDirectory>();
+                List<Record> recs = new List<Record>();
+
+                path = path.Replace('\\', '/');
+                var p = Path.Combine(REC_PATH, path);
+                foreach (string dir in Directory.EnumerateDirectories(p))
                 {
-                    List<RecordDirectory> subdirs = new List<RecordDirectory>();
-                    List<Record> recs = new List<Record>();
+                    var dirRec = SkyFrost.Base.RecordHelper.CreateForDirectory<Record>(LOCAL_OWNER, path,
+                        Path.GetFileNameWithoutExtension(dir));
+                    subdirs.Add(new RecordDirectory(dirRec, __instance, __instance.Engine));
+                }
 
-                    path = path.Replace('\\', '/');
-                    var p = Path.Combine(REC_PATH, path);
-                    foreach (string dir in Directory.EnumerateDirectories(p))
+                foreach (string file in Directory.EnumerateFiles(p))
+                {
+                    if (Path.GetExtension(file) != ".json") continue;
+
+                    var garbo = new Record();
+
+                    var fs = File.ReadAllText(file);
+                    // Json parsing is difficult, ok
+                    var record = JsonConvert.DeserializeObject<SkyFrost.Base.Record>(fs);
+
+                    garbo.RecordId = record.RecordId;
+                    garbo.OwnerId = record.OwnerId;
+                    garbo.AssetURI = record.AssetURI;
+                    garbo.Name = record.Name;
+                    garbo.Description = record.Description;
+                    garbo.RecordType = record.RecordType;
+                    garbo.OwnerName = record.OwnerName;
+                    garbo.Tags = record.Tags;
+                    garbo.Path = record.Path;
+                    garbo.ThumbnailURI = record.ThumbnailURI;
+                    garbo.IsPublic = record.IsPublic;
+                    garbo.IsForPatrons = record.IsForPatrons;
+                    garbo.IsListed = record.IsListed;
+                    garbo.LastModificationTime = record.LastModificationTime;
+                    // RootRecordId doesnt exist on CloudX records
+                    garbo.CreationTime = record.CreationTime;
+                    garbo.FirstPublishTime = record.FirstPublishTime;
+                    garbo.Visits = record.Visits;
+                    garbo.Rating = record.Rating;
+                    garbo.RandomOrder = record.RandomOrder;
+                    garbo.Submissions = record.Submissions;
+                    garbo.AssetManifest = record.AssetManifest;
+
+                    if (garbo.RecordType == "link")
                     {
-                        var dirRec = SkyFrost.Base.RecordHelper.CreateForDirectory<Record>(LOCAL_OWNER, path,
-                            Path.GetFileNameWithoutExtension(dir));
-                        subdirs.Add(new RecordDirectory(dirRec, __instance, __instance.Engine));
+                        subdirs.Add(new RecordDirectory(garbo, __instance, __instance.Engine));
                     }
-
-                    foreach (string file in Directory.EnumerateFiles(p))
+                    else
                     {
-                        if (Path.GetExtension(file) != ".json") continue;
-
-                        var garbo = new Record();
-
-                        var fs = File.ReadAllText(file);
-                        // Json parsing is difficult, ok
-                        var record = JsonConvert.DeserializeObject<SkyFrost.Base.Record>(fs);
-
-                        garbo.RecordId = record.RecordId;
-                        garbo.OwnerId = record.OwnerId;
-                        garbo.AssetURI = record.AssetURI;
-                        garbo.Name = record.Name;
-                        garbo.Description = record.Description;
-                        garbo.RecordType = record.RecordType;
-                        garbo.OwnerName = record.OwnerName;
-                        garbo.Tags = record.Tags;
-                        garbo.Path = record.Path;
-                        garbo.ThumbnailURI = record.ThumbnailURI;
-                        garbo.IsPublic = record.IsPublic;
-                        garbo.IsForPatrons = record.IsForPatrons;
-                        garbo.IsListed = record.IsListed;
-                        garbo.LastModificationTime = record.LastModificationTime;
-                        // RootRecordId doesnt exist on CloudX records
-                        garbo.CreationTime = record.CreationTime;
-                        garbo.FirstPublishTime = record.FirstPublishTime;
-                        garbo.Visits = record.Visits;
-                        garbo.Rating = record.Rating;
-                        garbo.RandomOrder = record.RandomOrder;
-                        garbo.Submissions = record.Submissions;
-                        garbo.AssetManifest = record.AssetManifest;
-
-                        if (garbo.RecordType == "link")
-                        {
-                            subdirs.Add(new RecordDirectory(garbo, __instance, __instance.Engine));
-                        }
-                        else
-                        {
-                            recs.Add(garbo);
-                        }
+                        recs.Add(garbo);
                     }
+                }
 
-                    AccessTools.Field(typeof(RecordDirectory), "subdirectories").SetValue(__instance, subdirs);
-                    AccessTools.Field(typeof(RecordDirectory), "records").SetValue(__instance, recs);
-                });
+                AccessTools.Field(typeof(RecordDirectory), "subdirectories").SetValue(__instance, subdirs);
+                AccessTools.Field(typeof(RecordDirectory), "records").SetValue(__instance, recs);
+                    
                 return false;
             }
 
@@ -384,7 +382,7 @@ public class Plugin : BasePlugin
 
         [HarmonyPatch("AddLinkAsync")]
         [HarmonyPrefix]
-        public static bool AddLinkAsync(string name, Uri target, RecordDirectory __instance, ref Task<Record> __result)
+        public static bool AddLinkAsync(string name, Uri target, RecordDirectory __instance, ref Record __result)
         {
             if (__instance.OwnerId == LOCAL_OWNER)
             {
@@ -404,7 +402,7 @@ public class Plugin : BasePlugin
                 RecordDirectory item = new RecordDirectory(record, __instance, __instance.Engine);
                 (AccessTools.Field(typeof(RecordDirectory), "subdirectories").GetValue(__instance) as
                     List<RecordDirectory>).Add(item);
-                __result = Task<Record>.Run(() => record);
+                __result = record;
                 return false;
             }
 
@@ -509,11 +507,11 @@ public class Plugin : BasePlugin
     {
         [HarmonyPatch("GatherAssetFile")]
         [HarmonyPrefix]
-        public static bool RequestGather(Uri assetURL, ref ValueTask<string> __result)
+        public static bool RequestGather(Uri assetURL, ref string __result)
         {
             if (assetURL.Scheme == "lstore")
             {
-                __result = new ValueTask<string>(ResolveLstore(assetURL));
+                __result = ResolveLstore(assetURL);
                 return false;
             }
 
