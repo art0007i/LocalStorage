@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>2.0.4</Version>
+    <Version>2.0.5</Version>
     <Authors>art0007i</Authors>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <RepositoryUrl>https://github.com/art0007i/LocalStorage</RepositoryUrl>
     <PackageId>art0007i.LocalStorage</PackageId>
     <Product>LocalStorage</Product>
@@ -21,7 +21,7 @@
 
     <PluginsDir>$(GamePath)BepInEx/plugins/</PluginsDir>
     <PluginTargetDir>$(PluginsDir)$(Authors)-$(AssemblyName)/$(AssemblyName)/</PluginTargetDir>
-    <CopyToPlugins>true</CopyToPlugins>
+    <CopyToPlugins>false</CopyToPlugins>
   </PropertyGroup>
 
   <!-- Modding dependencies -->
